@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zino - Mon Compte</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        :root {
+            --bg-main: #0F212E; --bg-panel: #1A2C38; --bg-card: #1A2C38;
+            --bg-hover: #253B4A; --text-main: #FFFFFF; --text-muted: #B1BAD3;
+            --border-color: #2F4553;
+            --zino-orange: #FFA94D; --zino-orange-dark: #FF922B;
+            --success: #00E701; --danger: #FF4D4D;
+        }
+        body { background-color: var(--bg-main); color: var(--text-main); min-height: 100vh; padding: 20px; }
+
+        header {
+            display: flex; justify-content: space-between; align-items: center;
+            background-color: var(--bg-panel); padding: 10px 20px; height: 56px;
+            border-bottom: 1px solid var(--border-color); border-radius: 10px;
+            margin-bottom: 25px;
+        }
+        .logo { font-size: 22px; font-weight: 800; letter-spacing: -1px; color: var(--zino-orange); text-decoration: none; }
+        .logo span { color: white; }
+        .back-btn { background: var(--bg-hover); color: white; border: none; padding: 8px 14px; border-radius: 4px; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+        .back-btn:hover { background: #2F4553; }
+        .balance-display { font-size: 15px; font-weight: 700; color: var(--zino-orange); }
+
+        .container { max-width: 900px; margin: 0 auto; }
+
+        .profile-card {
+            background: linear-gradient(135deg, #1A2C38 0%, #253B4A 100%);
+            border-radius: 16px; padding: 30px; margin-bottom: 25px;
+            border: 1px solid var(--border-color);
+            display: flex; align-items: center; gap: 25px;
+            position: relative; overflow: hidden;
+        }
+        .profile-card::before {
+            content: ''; position: absolute; top: -50%; right: -10%;
+            width: 300px; height: 300px;
+            background: radial-gradient(circle, rgba(255,169,77,0.15) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        .avatar {
+            width: 100px; height: 100px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--zino-orange) 0%, var(--zino-orange-dark) 100%);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 44px; font-weight: 900; color: #000;
+            box-shadow: 0 8px 25px rgba(255,169,77,0.4);
+            flex-shrink: 0; z-index: 1;
+        }
+        .profile-info { flex: 1; z-index: 1; }
+        .profile-username { font-size: 28px; font-weight: 900; margin-bottom: 6px; }
+        .profile-email { font-size: 14px; color: var(--text-muted); margin-bottom: 12px; }
+        .profile-meta { display: flex; gap: 20px; flex-wrap: wrap; font-size: 12px; color: var(--text-muted); }
+
+        .logout-btn {
+            background: rgba(255,77,77,0.15); color: var(--danger);
+            border: 1px solid rgba(255,77,77,0.3);
+            padding: 10px 20px; border-radius: 8px;
+            font-size: 13px; font-weight: 700; cursor: pointer;
+            transition: 0.2s; z-index: 1;
+        }
+        .logout-btn:hover { background: rgba(255,77,77,0.25); }
+
+        .balance-card {
+            background: linear-gradient(135deg, #1475E1 0%, #0D5BB8 100%);
+            border-radius: 16px; padding: 30px; margin-bottom: 25px;
+            text-align: center; position: relative; overflow: hidden;
+            box-shadow: 0 10px 30px rgba(20,117,225,0.3);
+        }
+        .balance-card::before {
+            content: ''; position: absolute; top: -50%; right: -20%;
+            width: 400px; height: 400px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        .balance-label { font-size: 13px; text-transform: uppercase; letter-spacing: 2px; opacity: 0.9; margin-bottom: 8px; font-weight: 700; z-index: 1; position: relative; }
+        .balance-value { font-size: 52px; font-weight: 900; z-index: 1; position: relative; text-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .balance-value .currency { font-size: 30px; opacity: 0.8; }
+
+        .stats-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr);
+            gap: 15px; margin-bottom: 25px;
+        }
+        .stat-card {
+            background: var(--bg-panel); border: 1px solid var(--border-color);
+            border-radius: 12px; padding: 20px; text-align: center;
+            transition: transform 0.2s;
+        }
+        .stat-card:hover { transform: translateY(-3px); }
+        .stat-icon { font-size: 24px; margin-bottom: 8px; }
+        .stat-card-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); font-weight: 700; margin-bottom: 6px; }
+        .stat-card-value { font-size: 22px; font-weight: 900; }
+        .stat-card-value.green { color: var(--success); }
+        .stat-card-value.orange { color: var(--zino-orange); }
+        .stat-card-value.red { color: var(--danger); }
+
+        .section-title {
+            font-size: 16px; font-weight: 800; margin-bottom: 15px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .section-title::before {
+            content: ''; width: 4px; height: 20px;
+            background: var(--zino-orange); border-radius: 2px;
+        }
+
+        .transactions-list {
+            background: var(--bg-panel); border: 1px solid var(--border-color);
+            border-radius: 12px; overflow: hidden;
+        }
+        .transaction-item {
+            display: flex; align-items: center; gap: 15px;
+            padding: 15px 20px; border-bottom: 1px solid rgba(47,69,83,0.5);
+            transition: background 0.2s;
+        }
+        .transaction-item:last-child { border-bottom: none; }
+        .transaction-item:hover { background: var(--bg-hover); }
+        .transaction-icon {
+            width: 40px; height: 40px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px; flex-shrink: 0;
+        }
+        .transaction-icon.win { background: rgba(0,231,1,0.15); color: var(--success); }
+        .transaction-icon.bet { background: rgba(255,77,77,0.15); color: var(--danger); }
+        .transaction-icon.welcome { background: rgba(255,169,77,0.15); color: var(--zino-orange); }
+        .transaction-info { flex: 1; }
+        .transaction-desc { font-size: 14px; font-weight: 700; margin-bottom: 3px; }
+        .transaction-date { font-size: 11px; color: var(--text-muted); }
+        .transaction-amount { font-size: 16px; font-weight: 900; white-space: nowrap; }
+        .transaction-amount.positive { color: var(--success); }
+        .transaction-amount.negative { color: var(--danger); }
+
+        .empty-state { padding: 40px; text-align: center; color: var(--text-muted); font-size: 14px; }
+
+        .deposit-section { margin-bottom: 25px; }
+        .deposit-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
+        .deposit-btn {
+            background: var(--bg-panel); border: 1px solid var(--border-color);
+            color: white; padding: 14px 24px; border-radius: 10px;
+            font-size: 14px; font-weight: 700; cursor: pointer;
+            transition: 0.2s; flex: 1; min-width: 120px;
+        }
+        .deposit-btn:hover { background: var(--zino-orange); color: #000; border-color: var(--zino-orange); }
+
+        .not-logged {
+            background: var(--bg-panel); border-radius: 16px; padding: 60px 30px;
+            text-align: center; border: 1px solid var(--border-color);
+        }
+        .not-logged .icon { font-size: 64px; margin-bottom: 20px; }
+        .not-logged h2 { font-size: 24px; margin-bottom: 10px; }
+        .not-logged p { color: var(--text-muted); margin-bottom: 25px; }
+        .not-logged a {
+            background: var(--zino-orange); color: #000; padding: 14px 30px;
+            border-radius: 8px; font-weight: 800; text-decoration: none;
+            display: inline-block; transition: 0.2s;
+        }
+        .not-logged a:hover { background: var(--zino-orange-dark); }
+
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            .profile-card { flex-direction: column; text-align: center; padding: 20px; gap: 15px; }
+            .profile-meta { justify-content: center; }
+            .balance-value { font-size: 38px; }
+            .balance-value .currency { font-size: 22px; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .avatar { width: 80px; height: 80px; font-size: 36px; }
+            .profile-username { font-size: 22px; }
+        }
+            /* ============================================================
+           OPTIMISATION MOBILE
+           ============================================================ */
+        @media (max-width: 768px) {
+            body { padding: 10px !important; }
+
+            header {
+                padding: 8px 12px !important;
+                height: 50px !important;
+                flex-direction: row !important;
+                gap: 10px !important;
+            }
+            .logo { font-size: 18px !important; }
+            .back-btn { padding: 5px 10px !important; font-size: 12px !important; }
+            .balance-display { font-size: 12px !important; }
+
+            /* Carte profil */
+            .profile-card {
+                flex-direction: column !important;
+                text-align: center !important;
+                padding: 20px 15px !important;
+                gap: 12px !important;
+            }
+            .avatar {
+                width: 80px !important;
+                height: 80px !important;
+                font-size: 36px !important;
+            }
+            .profile-username { font-size: 22px !important; }
+            .profile-email { font-size: 12px !important; }
+            .profile-meta {
+                justify-content: center !important;
+                font-size: 11px !important;
+                gap: 12px !important;
+            }
+            .logout-btn {
+                width: 100% !important;
+                padding: 12px !important;
+                font-size: 13px !important;
+            }
+
+            /* Carte solde */
+            .balance-card { padding: 20px !important; }
+            .balance-label { font-size: 11px !important; margin-bottom: 6px !important; }
+            .balance-value {
+                font-size: 40px !important;
+                line-height: 1 !important;
+            }
+            .balance-value .currency { font-size: 22px !important; }
+
+            /* Stats grid 2x2 */
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 10px !important;
+            }
+            .stat-card { padding: 14px 10px !important; }
+            .stat-icon { font-size: 20px !important; margin-bottom: 4px !important; }
+            .stat-card-label { font-size: 10px !important; }
+            .stat-card-value { font-size: 18px !important; }
+
+            /* Dépôts 2x2 */
+            .deposit-buttons {
+                flex-direction: column !important;
+                gap: 8px !important;
+            }
+            .deposit-btn {
+                padding: 14px !important;
+                font-size: 14px !important;
+                width: 100% !important;
+            }
+
+            /* Transactions */
+            .transaction-item {
+                padding: 12px !important;
+                gap: 10px !important;
+            }
+            .transaction-icon {
+                width: 34px !important;
+                height: 34px !important;
+                font-size: 16px !important;
+            }
+            .transaction-desc { font-size: 12px !important; }
+            .transaction-date { font-size: 10px !important; }
+            .transaction-amount { font-size: 14px !important; }
+
+            .section-title { font-size: 14px !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="index.html" class="logo">Zino<span>.bet</span></a>
+        <div style="display:flex; align-items:center; gap:15px;">
+            <div class="balance-display">Solde : <span id="headerBalance">--</span> €</div>
+            <a href="index.html" class="back-btn">← Accueil</a>
+        </div>
+    </header>
+
+    <div class="container" id="app">
+        <!-- Contenu injecté par JS -->
+    </div>
+
+    <script>
+        // ============================================================
+        // ZINO AUTH - Module intégré
+        // ============================================================
+        const ZinoAuth = (() => {
+            const USERS_KEY = 'zino_users_v1';
+            const SESSION_KEY = 'zino_session_v1';
+            function init() { if (!localStorage.getItem(USERS_KEY)) localStorage.setItem(USERS_KEY, JSON.stringify({})); }
+            function hashPassword(password) {
+                const salt = 'zino_salt_2026_xoxo';
+                const combined = salt + password + salt;
+                let hash = 0;
+                for (let i = 0; i < combined.length; i++) {
+                    const char = combined.charCodeAt(i);
+                    hash = ((hash << 5) - hash) + char;
+                    hash = hash & hash;
+                }
+                return 'h_' + Math.abs(hash).toString(36);
+            }
+            function register(email, password, username) {
+                init();
+                email = email.toLowerCase().trim();
+                if (!email || !email.includes('@')) return { success: false, error: 'Email invalide' };
+                if (!password || password.length < 4) return { success: false, error: 'Mot de passe trop court' };
+                if (!username || username.trim().length < 2) return { success: false, error: 'Pseudo trop court' };
+                const users = JSON.parse(localStorage.getItem(USERS_KEY));
+                if (users[email]) return { success: false, error: 'Cet email est déjà utilisé' };
+                const newUser = {
+                    email, username: username.trim(), passwordHash: hashPassword(password),
+                    balance: 1000, createdAt: Date.now(),
+                    stats: { totalWagered: 0, totalProfit: 0, gamesPlayed: 0, wins: 0, losses: 0 },
+                    transactions: [{ type: 'welcome', amount: 1000, date: Date.now(), description: 'Bonus de bienvenue 🎁' }]
+                };
+                users[email] = newUser;
+                localStorage.setItem(USERS_KEY, JSON.stringify(users));
+                localStorage.setItem(SESSION_KEY, email);
+                return { success: true, user: newUser };
+            }
+            function login(email, password) {
+                init();
+                email = email.toLowerCase().trim();
+                const users = JSON.parse(localStorage.getItem(USERS_KEY));
+                const user = users[email];
+                if (!user) return { success: false, error: 'Aucun compte avec cet email' };
+                if (user.passwordHash !== hashPassword(password)) return { success: false, error: 'Mot de passe incorrect' };
+                localStorage.setItem(SESSION_KEY, email);
+                return { success: true, user };
+            }
+            function logout() { localStorage.removeItem(SESSION_KEY); }
+            function getCurrentUser() {
+                init();
+                const email = localStorage.getItem(SESSION_KEY);
+                if (!email) return null;
+                const users = JSON.parse(localStorage.getItem(USERS_KEY));
+                return users[email] || null;
+            }
+            function isLoggedIn() { return getCurrentUser() !== null; }
+            function updateUser(updates) {
+                const email = localStorage.getItem(SESSION_KEY);
+                if (!email) return false;
+                const users = JSON.parse(localStorage.getItem(USERS_KEY));
+                if (!users[email]) return false;
+                users[email] = { ...users[email], ...updates };
+                localStorage.setItem(USERS_KEY, JSON.stringify(users));
+                return true;
+            }
+            function getBalance() { const u = getCurrentUser(); return u ? u.balance : 0; }
+            function setBalance(nb) { return updateUser({ balance: Math.max(0, nb) }); }
+            function addToBalance(amount, description = '') {
+                const user = getCurrentUser();
+                if (!user) return false;
+                const newBalance = Math.max(0, user.balance + amount);
+                const transactions = [...user.transactions];
+                transactions.unshift({ type: amount >= 0 ? 'win' : 'bet', amount, date: Date.now(), description: description || (amount >= 0 ? 'Gain' : 'Mise') });
+                if (transactions.length > 100) transactions.length = 100;
+                return updateUser({ balance: newBalance, transactions });
+            }
+            function updateStats({ wagered = 0, profit = 0, won = false }) {
+                const user = getCurrentUser();
+                if (!user) return false;
+                const stats = {
+                    totalWagered: user.stats.totalWagered + wagered,
+                    totalProfit: user.stats.totalProfit + profit,
+                    gamesPlayed: user.stats.gamesPlayed + 1,
+                    wins: user.stats.wins + (won ? 1 : 0),
+                    losses: user.stats.losses + (won ? 0 : 1)
+                };
+                return updateUser({ stats });
+            }
+            function deposit(amount) {
+                if (amount <= 0) return { success: false, error: 'Montant invalide' };
+                addToBalance(amount, `Dépôt de ${amount} €`);
+                return { success: true };
+            }
+            function getTransactions() { const u = getCurrentUser(); return u ? u.transactions : []; }
+            return { register, login, logout, getCurrentUser, isLoggedIn, updateUser, getBalance, setBalance, addToBalance, updateStats, deposit, getTransactions };
+        })();
+
+        function formatDate(timestamp) {
+            const date = new Date(timestamp);
+            const diff = new Date() - date;
+            if (diff < 60000) return 'À l\'instant';
+            if (diff < 3600000) return `Il y a ${Math.floor(diff / 60000)} min`;
+            if (diff < 86400000) return `Il y a ${Math.floor(diff / 3600000)}h`;
+            return date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        }
+
+        function showToast(message, type = 'info') {
+            let toast = document.getElementById('zino-toast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'zino-toast';
+                toast.style.cssText = `position: fixed; top: 80px; left: 50%; transform: translateX(-50%); background: #1A2C38; color: white; padding: 14px 24px; border-radius: 8px; font-weight: 600; font-size: 14px; z-index: 9999; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border-left: 4px solid #FFA94D; opacity: 0; transition: opacity 0.3s, transform 0.3s; pointer-events: none;`;
+                document.body.appendChild(toast);
+            }
+            toast.textContent = message;
+            toast.style.borderLeftColor = type === 'error' ? '#FF4D4D' : type === 'success' ? '#00E701' : '#FFA94D';
+            toast.style.opacity = '1';
+            toast.style.transform = 'translateX(-50%) translateY(0)';
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(-50%) translateY(-20px)';
+            }, 2500);
+        }
+
+        // ============================================================
+        // RENDU DE LA PAGE
+        // ============================================================
+        const user = ZinoAuth.getCurrentUser();
+
+        function render() {
+            const app = document.getElementById('app');
+
+            if (!user) {
+                app.innerHTML = `
+                    <div class="not-logged">
+                        <div class="icon">🔒</div>
+                        <h2>Vous n'êtes pas connecté</h2>
+                        <p>Connectez-vous ou créez un compte pour accéder à votre profil.</p>
+                        <a href="index.html">← Retour à l'accueil</a>
+                    </div>
+                `;
+                return;
+            }
+
+            const stats = user.stats;
+            const profitSign = stats.totalProfit >= 0 ? '+' : '';
+
+            const transactionsHtml = user.transactions.length > 0
+                ? user.transactions.slice(0, 20).map(t => {
+                    const isPositive = t.amount >= 0;
+                    const iconClass = t.type === 'welcome' ? 'welcome' : isPositive ? 'win' : 'bet';
+                    const icon = t.type === 'welcome' ? '🎁' : isPositive ? '↓' : '↑';
+                    const sign = isPositive ? '+' : '';
+                    return `
+                        <div class="transaction-item">
+                            <div class="transaction-icon ${iconClass}">${icon}</div>
+                            <div class="transaction-info">
+                                <div class="transaction-desc">${t.description}</div>
+                                <div class="transaction-date">${formatDate(t.date)}</div>
+                            </div>
+                            <div class="transaction-amount ${isPositive ? 'positive' : 'negative'}">
+                                ${sign}${t.amount.toFixed(2)} €
+                            </div>
+                        </div>
+                    `;
+                }).join('')
+                : '<div class="empty-state">Aucune transaction pour le moment</div>';
+
+            const initial = (user.username || user.email)[0].toUpperCase();
+
+            app.innerHTML = `
+                <div class="profile-card">
+                    <div class="avatar">${initial}</div>
+                    <div class="profile-info">
+                        <div class="profile-username">${user.username}</div>
+                        <div class="profile-email">${user.email}</div>
+                        <div class="profile-meta">
+                            <span>📅 Inscrit le ${new Date(user.createdAt).toLocaleDateString('fr-FR')}</span>
+                            <span>🎮 ${stats.gamesPlayed} parties jouées</span>
+                        </div>
+                    </div>
+                    <button class="logout-btn" onclick="handleLogout()">Déconnexion</button>
+                </div>
+
+                <div class="balance-card">
+                    <div class="balance-label">Solde disponible</div>
+                    <div class="balance-value"><span>${user.balance.toFixed(2)}</span> <span class="currency">€</span></div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">🎯</div>
+                        <div class="stat-card-label">Parties jouées</div>
+                        <div class="stat-card-value">${stats.gamesPlayed}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🏆</div>
+                        <div class="stat-card-label">Victoires</div>
+                        <div class="stat-card-value green">${stats.wins}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">💸</div>
+                        <div class="stat-card-label">Total misé</div>
+                        <div class="stat-card-value orange">${stats.totalWagered.toFixed(0)} €</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📈</div>
+                        <div class="stat-card-label">Profit</div>
+                        <div class="stat-card-value ${stats.totalProfit >= 0 ? 'green' : 'red'}">${profitSign}${stats.totalProfit.toFixed(2)} €</div>
+                    </div>
+                </div>
+
+                <div class="deposit-section">
+                    <div class="section-title">💰 Ajouter des fonds (démo)</div>
+                    <div class="deposit-buttons">
+                        <button class="deposit-btn" onclick="handleDeposit(50)">+ 50 €</button>
+                        <button class="deposit-btn" onclick="handleDeposit(100)">+ 100 €</button>
+                        <button class="deposit-btn" onclick="handleDeposit(500)">+ 500 €</button>
+                        <button class="deposit-btn" onclick="handleDeposit(1000)">+ 1000 €</button>
+                    </div>
+                </div>
+
+                <div class="section-title">📜 Historique des transactions</div>
+                <div class="transactions-list">
+                    ${transactionsHtml}
+                </div>
+            `;
+
+            // Mettre à jour le solde dans le header
+            document.getElementById('headerBalance').textContent = user.balance.toFixed(2);
+        }
+
+        function handleLogout() {
+            if (confirm('Voulez-vous vraiment vous déconnecter ?')) {
+                ZinoAuth.logout();
+                window.location.href = 'index.html';
+            }
+        }
+
+        function handleDeposit(amount) {
+            ZinoAuth.deposit(amount);
+            showToast(`+${amount} € ajoutés à votre solde`, 'success');
+            setTimeout(() => window.location.reload(), 800);
+        }
+
+        render();
+    </script>
+</body>
+</html>

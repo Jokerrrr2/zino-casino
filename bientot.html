@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zino - Casino en ligne</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        :root {
+            --bg-main: #0F212E; --bg-sidebar: #1A2C38; --bg-card: #1A2C38;
+            --bg-hover: #253B4A; --text-main: #FFFFFF; --text-muted: #B1BAD3;
+            --accent-blue: #1475E1; --border-color: #2F4553;
+            --zino-orange: #FFA94D; --zino-orange-dark: #FF922B;
+        }
+        body { background-color: var(--bg-main); color: var(--text-main); display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+        header { display: flex; justify-content: space-between; align-items: center; background-color: var(--bg-sidebar); padding: 12px 20px; height: 64px; border-bottom: 1px solid var(--border-color); z-index: 100; }
+        .header-left, .header-right { display: flex; align-items: center; gap: 15px; }
+        .menu-btn { display: none; background: none; border: none; color: white; font-size: 24px; cursor: pointer; }
+        .logo { font-size: 26px; font-weight: 800; letter-spacing: -1px; color: var(--zino-orange); text-decoration: none; }
+        .logo span { color: white; }
+        .mode-switch { display: flex; background-color: var(--bg-main); border-radius: 20px; padding: 2px; }
+        .mode-switch button { background: none; border: none; color: var(--text-muted); padding: 6px 16px; border-radius: 18px; font-weight: 600; font-size: 14px; cursor: pointer; }
+        .mode-switch button.active { background-color: var(--bg-sidebar); color: white; }
+        .balance { font-size: 14px; color: var(--text-muted); font-weight: 600; }
+        .login-btn { background-color: var(--zino-orange); color: #000; border: none; padding: 8px 16px; border-radius: 4px; font-weight: 700; font-size: 14px; cursor: pointer; transition: 0.2s; }
+        .login-btn:hover { background-color: var(--zino-orange-dark); }
+        .wallet-btn { background-color: var(--accent-blue); color: white; border: none; padding: 8px 16px; border-radius: 4px; font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.2s; }
+        .wallet-btn:hover { background-color: #0d5bb8; }
+        .icon-btn { background: none; border: none; color: var(--text-muted); font-size: 20px; cursor: pointer; }
+
+        .app-container { display: flex; flex: 1; overflow: hidden; }
+        aside { width: 240px; background-color: var(--bg-sidebar); overflow-y: auto; padding: 20px 10px; border-right: 1px solid var(--border-color); transition: transform 0.3s ease; flex-shrink: 0; }
+        aside::-webkit-scrollbar { width: 4px; }
+        aside::-webkit-scrollbar-thumb { background: #2F4553; border-radius: 4px; }
+        .nav-section { margin-bottom: 20px; }
+        .nav-title { font-size: 11px; text-transform: uppercase; color: #556987; font-weight: 700; padding-left: 10px; margin-bottom: 8px; letter-spacing: 0.5px; }
+        .nav-item { display: flex; align-items: center; padding: 10px; border-radius: 6px; color: var(--text-muted); text-decoration: none; font-size: 14px; font-weight: 600; transition: 0.2s; cursor: pointer; }
+        .nav-item:hover { background-color: var(--bg-hover); color: white; }
+        .nav-item.active { color: white; background-color: rgba(255, 169, 77, 0.1); border-left: 3px solid var(--zino-orange); }
+
+        main { flex: 1; padding: 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; }
+        main::-webkit-scrollbar { width: 6px; }
+        main::-webkit-scrollbar-thumb { background: #2F4553; border-radius: 6px; }
+        .page-title { font-size: 20px; font-weight: 700; }
+        .toolbar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+        .search-box { position: relative; flex: 1; min-width: 250px; }
+        .search-box input { width: 100%; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); color: white; padding: 10px 10px 10px 36px; border-radius: 4px; font-size: 14px; outline: none; transition: 0.2s; }
+        .search-box input:focus { border-color: var(--zino-orange); }
+        .search-box input::placeholder { color: #556987; }
+        .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #556987; }
+        .filter-btn { background-color: var(--bg-sidebar); border: 1px solid var(--border-color); color: var(--text-muted); padding: 10px 16px; border-radius: 4px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
+        .filter-btn:hover { background-color: var(--bg-hover); color: white; }
+
+        .games-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+        .game-card { background-color: var(--bg-card); border-radius: 8px; overflow: hidden; position: relative; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; aspect-ratio: 3/4; text-decoration: none; color: inherit; display: block; }
+        .game-card:hover { transform: translateY(-4px); box-shadow: 0 8px 16px rgba(0,0,0,0.4); }
+        .game-card img { width: 100%; height: 100%; object-fit: cover; display: block; transition: filter 0.25s ease; }
+        .game-card::after { content: '▶ JOUER'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.8); background: var(--zino-orange); color: #000; padding: 8px 16px; border-radius: 6px; font-size: 12px; font-weight: 800; letter-spacing: 1px; opacity: 0; transition: all 0.25s ease; pointer-events: none; z-index: 3; }
+        .game-card:hover::after { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        .game-card:hover img { filter: brightness(0.4); }
+        .game-info { position: absolute; bottom: 0; left: 0; right: 0; padding: 10px; background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 100%); display: flex; flex-direction: column; justify-content: flex-end; z-index: 2; }
+        .game-title { font-size: 12px; font-weight: 700; text-transform: uppercase; color: white; }
+        .game-players { font-size: 10px; color: var(--text-muted); display: flex; align-items: center; gap: 4px; }
+        .game-players::before { content: ''; display: inline-block; width: 6px; height: 6px; background-color: var(--zino-orange); border-radius: 50%; }
+        .provider-badge { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.6); padding: 4px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; color: white; z-index: 2; }
+
+        /* MODAL CONNEXION */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 999; backdrop-filter: blur(5px); }
+        .modal-overlay.active { display: flex; }
+        .modal { background-color: var(--bg-sidebar); border-radius: 12px; width: 100%; max-width: 400px; padding: 32px; position: relative; border: 1px solid var(--border-color); box-shadow: 0 20px 40px rgba(0,0,0,0.6); animation: slideUp 0.3s ease; }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .modal-close { position: absolute; top: 16px; right: 16px; background: none; border: none; color: var(--text-muted); font-size: 24px; cursor: pointer; }
+        .modal-close:hover { color: white; }
+        .modal-logo { font-size: 32px; font-weight: 800; text-align: center; margin-bottom: 8px; color: var(--zino-orange); letter-spacing: -1px; }
+        .modal-subtitle { text-align: center; color: var(--text-muted); font-size: 14px; margin-bottom: 24px; }
+        .social-btn { width: 100%; padding: 12px; border-radius: 6px; border: 1px solid var(--border-color); background-color: var(--bg-main); color: white; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 12px; transition: 0.2s; }
+        .social-btn:hover { background-color: var(--bg-hover); }
+        .social-btn svg { width: 20px; height: 20px; }
+        .divider { display: flex; align-items: center; text-align: center; color: var(--text-muted); font-size: 12px; margin: 20px 0; }
+        .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid var(--border-color); }
+        .divider span { padding: 0 10px; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 6px; font-weight: 600; }
+        .form-group input { width: 100%; padding: 12px; background-color: var(--bg-main); border: 1px solid var(--border-color); border-radius: 6px; color: white; font-size: 14px; outline: none; transition: 0.2s; }
+        .form-group input:focus { border-color: var(--zino-orange); }
+        .submit-btn { width: 100%; padding: 14px; background-color: var(--zino-orange); color: #000; border: none; border-radius: 6px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 8px; transition: 0.2s; }
+        .submit-btn:hover { background-color: var(--zino-orange-dark); }
+        .modal-footer { text-align: center; margin-top: 20px; font-size: 13px; color: var(--text-muted); }
+        .modal-footer a { color: var(--zino-orange); text-decoration: none; font-weight: 600; cursor: pointer; }
+
+        @media (max-width: 1024px) { .games-grid { grid-template-columns: repeat(4, 1fr); } }
+        @media (max-width: 768px) {
+            .menu-btn { display: block; }
+            .mode-switch { display: none; }
+            .balance { display: none; }
+            aside { position: fixed; top: 64px; left: 0; bottom: 0; transform: translateX(-100%); z-index: 90; box-shadow: 4px 0 15px rgba(0,0,0,0.5); }
+            aside.open { transform: translateX(0); }
+            .games-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+            .toolbar { flex-direction: column; align-items: stretch; }
+            .search-box { width: 100%; }
+            .filter-btn { flex: 1; justify-content: center; }
+            main { padding: 16px; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-left">
+            <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+            <a href="index.html" class="logo">Zino<span>.bet</span></a>
+        </div>
+        <div class="mode-switch">
+            <button class="active" onclick="location.href='index.html'">Casino</button>
+            <button onclick="location.href='bientot.html?page=Sports'">Sports</button>
+        </div>
+        <div class="header-right">
+            <div class="balance">0.00000000</div>
+            <button class="wallet-btn" onclick="location.href='bientot.html?page=Portefeuille'">Portefeuille</button>
+            <button class="login-btn" onclick="openModal()">Se connecter</button>
+            <button class="icon-btn" onclick="location.href='bientot.html?page=Recherche'">🔍</button>
+            <button class="icon-btn" onclick="openModal()">👤</button>
+        </div>
+    </header>
+
+    <div class="app-container">
+        <aside id="sidebar">
+            <div class="nav-section">
+                <a class="nav-item" href="bientot.html?page=Favoris">⭐ Favoris</a>
+                <a class="nav-item" href="bientot.html?page=Récents">🕒 Récents</a>
+                <a class="nav-item" href="bientot.html?page=Défis">🏆 Défis</a>
+                <a class="nav-item" href="bientot.html?page=Mes Paris">📊 Mes Paris</a>
+            </div>
+            <div class="nav-section">
+                <div class="nav-title">Jeux</div>
+                <a class="nav-item" href="bientot.html?page=Originaux Zino">🔥 Originaux Zino</a>
+                <a class="nav-item" href="bientot.html?page=Exclusivités Zino">💎 Exclusivités de Zino</a>
+                <a class="nav-item" href="bientot.html?page=Machines à sous">🎰 Machines à sous</a>
+                <a class="nav-item" href="bientot.html?page=Casino en direct">🎥 Casino en direct</a>
+                <a class="nav-item" href="bientot.html?page=Jeux télévisés">📺 Jeux télévisés</a>
+                <a class="nav-item" href="bientot.html?page=Nouveautés">🆕 Nouveautés sorties</a>
+                <a class="nav-item" href="bientot.html?page=Achat de Bonus">🎁 Achat de Bonus</a>
+                <a class="nav-item" href="bientot.html?page=RTP amélioré">📈 RTP amélioré</a>
+                <a class="nav-item active" href="index.html">🃏 Jeux de table</a>
+                <a class="nav-item" href="blackjack.html">♠️ Blackjack</a>
+                <a class="nav-item" href="bientot.html?page=Baccarat">♦️ Baccarat</a>
+            </div>
+        </aside>
+
+        <main>
+            <h1 class="page-title">Jeux de Table</h1>
+            <div class="toolbar">
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" placeholder="Cherchez votre jeu">
+                </div>
+                <button class="filter-btn" onclick="location.href='bientot.html?page=Filtres'">⚙️ Filtrer par</button>
+                <button class="filter-btn" onclick="location.href='bientot.html?page=Tri'">⇅ Classé par</button>
+            </div>
+            <div class="games-grid">
+
+                <!-- BLACKJACK - JEU ACTIF -->
+                <a href="blackjack.html" class="game-card">
+                    <img src="https://images.unsplash.com/photo-1541278107931-e006523892df?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Blackjack">
+                    <div class="provider-badge">Zino</div>
+                    <div class="game-info">
+                        <div class="game-title">Blackjack</div>
+                        <div class="game-players">967 en jeu</div>
+                    </div>
+                </a>
+
+                <!-- AUTRES JEUX - REDIRECTION VERS BIENTOT -->
+                <a href="bientot.html?page=Dice" class="game-card">
+                    <img src="https://images.unsplash.com/photo-1596838132731-3301c3fd4317?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Dice">
+                    <div class="provider-badge">Zino</div>
+                    <div class="game-info"><div class="game-title">Dice</div><div class="game-players">1560 en jeu</div></div>
+                </a>
+
+                <a href="bientot.html?page=Roulette" class="game-card">
+                    <img src="https://images.unsplash.com/photo-1605870445919-838d190e8e1b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Roulette">
+                    <div class="provider-badge">Zino</div>
+                    <div class="game-info"><div class="game-title">Roulette</div><div class="game-players">354 en jeu</div></div>
+                </a>
+
+                <a href="bientot.html?page=Poker" class="game-card">
+                    <img src="https://images.unsplash.com/photo-1518133910546-b6c2fb7d79e3?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Poker">
+                    <div class="provider-badge">Zino</div>
+                    <div class="game-info"><div class="game-title">Poker</div><div class="game-players">180 en jeu</div></div>
+                </a>
+
+                <a href="bientot.html?page=Baccarat" class="game-card">
+                    <img src="https://images.unsplash.com/photo-1587323899686-9249d9c7e6c1?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Baccarat">
+                    <div class="provider-badge">Zino</div>
+                    <div class="game-info"><div class="game-title">Baccarat</div><div class="game-players">125 en jeu</div></div>
+                </a>
+
+                <a href="bientot.html?page=Space" class="game-card">
+                    <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Space">
+                    <div class="provider-badge">Zino</div>
+                    <div class="game-info"><div class="game-title">Space</div><div class="game-players">89 en jeu</div></div>
+                </a>
+
+                <a href="bientot.html?page=Crash" class="game-card">
+                    <img src="https://images.unsplash.com/photo-1596838132731-3301c3fd4317?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Crash">
+                    <div class="provider-badge">Zino</div>
+                    <div class="game-info"><div class="game-title">Crash</div><div class="game-players">3200 en jeu</div></div>
+                </a>
+
+                <a href="bientot.html?page=Plinko" class="game-card">
+                    <img src="https://images.unsplash.com/photo-1541278107931-e006523892df?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Plinko">
+                    <div class="provider-badge">Zino</div>
+                    <div class="game-info"><div class="game-title">Plinko</div><div class="game-players">2450 en jeu</div></div>
+                </a>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL CONNEXION -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal()">×</button>
+            <div class="modal-logo">Zino</div>
+            <div class="modal-subtitle">Connectez-vous ou créez un compte</div>
+
+            <button class="social-btn" onclick="alert('Connexion Google - À brancher plus tard')">
+                <svg viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/></svg>
+                Continuer avec Google
+            </button>
+
+            <button class="social-btn" onclick="alert('Connexion Apple - À brancher plus tard')">
+                <svg viewBox="0 0 24 24" fill="white"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
+                Continuer avec Apple
+            </button>
+
+            <div class="divider"><span>OU</span></div>
+
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" placeholder="votre@email.com">
+            </div>
+            <div class="form-group">
+                <label>Mot de passe</label>
+                <input type="password" placeholder="••••••••">
+            </div>
+            <button class="submit-btn" onclick="alert('Connexion classique - À brancher à un backend')">Se connecter</button>
+
+            <div class="modal-footer">
+                Pas encore de compte ? <a onclick="alert('Inscription - À venir')">Inscrivez-vous</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+        function openModal() {
+            document.getElementById('loginModal').classList.add('active');
+        }
+        function closeModal() {
+            document.getElementById('loginModal').classList.remove('active');
+        }
+        document.getElementById('loginModal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('sidebar');
+            const menuBtn = document.querySelector('.menu-btn');
+            if (window.innerWidth <= 768) {
+                if (!sidebar.contains(event.target) && !menuBtn.contains(event.target) && sidebar.classList.contains('open')) {
+                    sidebar.classList.remove('open');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

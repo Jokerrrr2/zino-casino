@@ -1,0 +1,1273 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zino - Roulette Premium</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎡</text></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; user-select: none; }
+        :root {
+            --bg-main: #0F212E; --bg-panel: #1A2C38;
+            --bg-hover: #253B4A; --text-main: #FFFFFF; --text-muted: #B1BAD3;
+            --border-color: #2F4553;
+            --zino-orange: #FFA94D; --zino-orange-dark: #FF922B; --zino-orange-glow: rgba(255,169,77,0.5);
+            --success: #00E701; --danger: #FF4D4D;
+            --roulette-red: #B71C1C;
+            --roulette-black: #0D0D0D;
+            --roulette-green: #0B6B3A;
+            --gold: #D4AF37;
+        }
+        body { background-color: var(--bg-main); color: var(--text-main); display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+        header { display: flex; justify-content: space-between; align-items: center; background-color: var(--bg-panel); padding: 10px 20px; height: 56px; border-bottom: 1px solid var(--border-color); z-index: 100; }
+        .logo { font-size: 22px; font-weight: 800; letter-spacing: -1px; color: var(--zino-orange); text-decoration: none; }
+        .logo span { color: white; }
+        .back-btn { background: var(--bg-hover); color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; }
+        .back-btn:hover { background: #2F4553; }
+        .header-right { display: flex; align-items: center; gap: 15px; }
+        .balance-display { font-size: 14px; font-weight: 700; color: var(--zino-orange); }
+        .user-badge {
+            display: flex; align-items: center; gap: 8px;
+            background: var(--bg-main); border-radius: 25px;
+            padding: 4px 14px 4px 4px; cursor: pointer;
+            border: 1px solid var(--border-color); transition: 0.2s;
+            text-decoration: none; color: white;
+        }
+        .user-badge:hover { border-color: var(--zino-orange); }
+        .user-avatar {
+            width: 28px; height: 28px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--zino-orange) 0%, var(--zino-orange-dark) 100%);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 12px; font-weight: 900; color: #000;
+        }
+        .user-name { font-size: 12px; font-weight: 700; }
+        .sound-btn { background: var(--bg-hover); color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 16px; }
+        .sound-btn.muted { opacity: 0.4; }
+
+        .game-layout { display: flex; flex: 1; overflow: hidden; }
+
+        .side-panel { width: 300px; background-color: var(--bg-panel); padding: 15px; overflow-y: auto; flex-shrink: 0; border-right: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 12px; }
+        .side-panel::-webkit-scrollbar { width: 4px; }
+        .side-panel::-webkit-scrollbar-thumb { background: #2F4553; border-radius: 4px; }
+        .panel-title { font-size: 11px; text-transform: uppercase; color: #556987; font-weight: 700; margin-bottom: 4px; letter-spacing: 0.5px; }
+
+        .bet-info { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 6px; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
+        .bet-info-label { color: var(--text-muted); font-size: 11px; text-transform: uppercase; font-weight: 700; }
+        .bet-info-value { color: var(--zino-orange); font-weight: 800; font-size: 18px; }
+
+        .chips-container { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; padding: 8px 0; }
+        .chip { width: 52px; height: 52px; border-radius: 50%; position: relative; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; color: white; border: 3px dashed rgba(255,255,255,0.6); box-shadow: 0 4px 8px rgba(0,0,0,0.4), inset 0 -3px 6px rgba(0,0,0,0.2); transition: transform 0.15s ease; }
+        .chip:hover { transform: translateY(-3px) scale(1.05); }
+        .chip:active { transform: translateY(0) scale(0.95); }
+        .chip.selected { border-style: solid; border-color: var(--zino-orange); box-shadow: 0 0 15px var(--zino-orange-glow); }
+        .chip.chip-1 { background: linear-gradient(135deg, #FFFFFF 0%, #E0E0E0 100%); color: #333; border-color: #999; }
+        .chip.chip-5 { background: linear-gradient(135deg, #FF4D4D 0%, #C62828 100%); }
+        .chip.chip-25 { background: linear-gradient(135deg, #00E701 0%, #009900 100%); }
+        .chip.chip-100 { background: linear-gradient(135deg, #1A1A1A 0%, #333 100%); }
+        .chip.chip-500 { background: linear-gradient(135deg, #9C27B0 0%, #6A1B9A 100%); }
+
+        .main-btn { background: linear-gradient(135deg, var(--zino-orange) 0%, var(--zino-orange-dark) 100%); color: #000; border: none; padding: 16px; border-radius: 8px; font-size: 15px; font-weight: 800; cursor: pointer; transition: 0.2s; text-transform: uppercase; letter-spacing: 1px; }
+        .main-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255,169,77,0.5); }
+        .main-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .undo-btn { background: var(--bg-main); color: var(--text-muted); border: 2px solid var(--border-color); padding: 12px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+        .undo-btn:hover:not(:disabled) { background: var(--bg-hover); color: white; }
+        .undo-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .stats-box { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 6px; padding: 12px; }
+        .stat-row { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px; }
+        .stat-row:last-child { margin-bottom: 0; }
+        .stat-label { color: var(--text-muted); }
+        .stat-value { font-weight: 700; }
+        .stat-value.green { color: var(--success); }
+        .stat-value.red { color: var(--danger); }
+
+        .history-numbers { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 6px; min-height: 24px; }
+        .history-num { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; color: white; cursor: help; }
+        .history-num.red { background: var(--roulette-red); }
+        .history-num.black { background: var(--roulette-black); border: 1px solid #444; }
+        .history-num.green { background: var(--roulette-green); }
+
+        /* ZONE DE JEU */
+        .game-area { flex: 1; display: flex; flex-direction: column; background: radial-gradient(circle at center, #1A2C38 0%, #0F212E 100%); position: relative; overflow-y: auto; padding: 15px; }
+
+        /* ============================================
+           ROUE DE ROULETTE ULTRA RÉALISTE
+           ============================================ */
+        .roulette-container { display: flex; flex-direction: column; align-items: center; padding: 5px 0; }
+
+        .wheel-wrapper {
+            position: relative;
+            width: 400px;
+            height: 400px;
+            margin-bottom: 10px;
+            /* Perspective : vue légèrement de biais */
+            perspective: 1500px;
+            perspective-origin: 50% 40%;
+        }
+
+        .wheel-scene {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            /* Légère inclinaison pour effet réaliste */
+            transform: rotateX(20deg);
+            filter: drop-shadow(0 20px 40px rgba(0,0,0,0.8));
+        }
+
+        /* Jante extérieure en bois vernis */
+        .wheel-rim {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            background: 
+                radial-gradient(circle at 35% 25%, #8B6B3F 0%, #5C4423 40%, #3A2412 80%, #1F1208 100%);
+            box-shadow: 
+                0 0 0 2px #1A0F05,
+                0 0 0 6px rgba(212, 175, 55, 0.5),
+                0 0 0 8px rgba(60, 40, 20, 0.8),
+                inset 0 -15px 30px rgba(0,0,0,0.9),
+                inset 0 15px 30px rgba(255, 215, 130, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Anneau doré intérieur */
+        .wheel-rim::before {
+            content: '';
+            position: absolute;
+            inset: 20px;
+            border-radius: 50%;
+            background: 
+                radial-gradient(circle at 35% 30%, #F5D76E 0%, #D4AF37 40%, #8B6B3F 80%, #5C4423 100%);
+            box-shadow: 
+                inset 0 0 0 2px rgba(60, 40, 20, 0.9),
+                inset 0 0 20px rgba(0,0,0,0.5),
+                0 0 10px rgba(0,0,0,0.5);
+        }
+
+        /* Piste de la bille (entre anneau doré et secteurs) */
+        .wheel-ball-track {
+            position: absolute;
+            inset: 42px;
+            border-radius: 50%;
+            background: 
+                radial-gradient(circle at 50% 50%, #0A3520 0%, #062211 80%);
+            box-shadow: 
+                inset 0 0 20px rgba(0,0,0,1),
+                inset 0 0 6px rgba(212, 175, 55, 0.2),
+                0 0 0 2px rgba(212, 175, 55, 0.4);
+        }
+
+        /* Roue intérieure (secteurs) */
+        .wheel {
+            position: absolute;
+            inset: 60px;
+            border-radius: 50%;
+            transition: transform 5s cubic-bezier(0.15, 0.65, 0.1, 1);
+            transform-origin: center;
+            box-shadow: 
+                inset 0 0 15px rgba(0,0,0,0.8),
+                inset 0 0 4px rgba(212, 175, 55, 0.3);
+            overflow: hidden;
+        }
+
+        .wheel-svg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .wheel-numbers {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        /* Numéros orientés vers le centre (lisibles depuis l'extérieur) */
+        .wheel-number {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 900;
+            color: white;
+            text-shadow: 
+                0 1px 2px rgba(0,0,0,1),
+                0 0 3px rgba(0,0,0,0.8);
+            font-family: 'Inter', sans-serif;
+            z-index: 3;
+        }
+
+        /* Moyeu central doré */
+        .wheel-hub {
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 110px; height: 110px;
+            margin: -55px 0 0 -55px;
+            border-radius: 50%;
+            background: 
+                radial-gradient(circle at 35% 30%, #F5D76E 0%, #D4AF37 25%, #B8935A 50%, #8B6B3F 75%, #5C4423 100%);
+            box-shadow: 
+                0 8px 25px rgba(0,0,0,0.9),
+                0 0 0 3px rgba(60, 40, 20, 0.8),
+                inset 0 -6px 12px rgba(0,0,0,0.6),
+                inset 0 6px 12px rgba(255, 255, 255, 0.35);
+            z-index: 5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .wheel-hub::before {
+            content: '';
+            position: absolute;
+            width: 75px; height: 75px;
+            border-radius: 50%;
+            border: 3px solid rgba(60,40,20,0.8);
+            background: radial-gradient(circle at 40% 35%, #C9A961 0%, #8B6B3F 50%, #5C4423 100%);
+            box-shadow: 
+                inset 0 4px 10px rgba(0,0,0,0.7),
+                inset 0 -2px 6px rgba(255, 215, 130, 0.3);
+        }
+
+        .wheel-hub::after {
+            content: '★';
+            position: absolute;
+            font-size: 36px;
+            color: #3A2412;
+            text-shadow: 
+                0 1px 0 rgba(255, 215, 130, 0.6),
+                0 -1px 0 rgba(0,0,0,0.7),
+                0 0 8px rgba(0,0,0,0.5);
+        }
+
+        /* BILLE */
+        .ball {
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 16px; height: 16px;
+            margin: -8px 0 0 -8px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #FFFFFF 0%, #F0F0F0 20%, #C0C0C0 50%, #808080 80%, #404040 100%);
+            box-shadow: 
+                0 4px 12px rgba(0,0,0,0.95),
+                inset -3px -3px 6px rgba(0,0,0,0.4),
+                inset 3px 3px 6px rgba(255,255,255,0.9),
+                0 0 10px rgba(255,255,255,0.5);
+            z-index: 6;
+            will-change: transform;
+            transition: transform 5s cubic-bezier(0.15, 0.65, 0.1, 1);
+        }
+        .ball::after {
+            content: '';
+            position: absolute;
+            top: 2px; left: 4px;
+            width: 5px; height: 5px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.95);
+            filter: blur(1.5px);
+        }
+
+        /* RÉSULTAT */
+        .result-display { text-align: center; margin-top: 10px; }
+        .result-label { font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px; }
+        .result-num {
+            font-size: 50px; font-weight: 900; line-height: 1;
+            display: inline-block; padding: 10px 26px; border-radius: 14px;
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            min-width: 120px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+        }
+        .result-num.red { background: linear-gradient(135deg, #D32F2F 0%, #8B0000 100%); color: white; border: 2px solid #FF5252; }
+        .result-num.black { background: linear-gradient(135deg, #2A2A2A 0%, #0A0A0A 100%); color: white; border: 2px solid #444; }
+        .result-num.green { background: linear-gradient(135deg, #0F8043 0%, #065C2C 100%); color: white; border: 2px solid #00C853; }
+        .result-num.idle { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.15); border: 2px solid var(--border-color); }
+        .result-num.win { animation: winResult 0.8s ease; }
+        @keyframes winResult { 
+            0% { transform: scale(1); } 
+            40% { transform: scale(1.25); box-shadow: 0 0 50px var(--success), 0 0 80px var(--success); } 
+            100% { transform: scale(1); } 
+        }
+
+        .result-message { font-size: 18px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; opacity: 0; transition: opacity 0.3s; min-height: 22px; margin-top: 4px; }
+        .result-message.active { opacity: 1; }
+        .result-message.win { color: var(--success); }
+        .result-message.lose { color: var(--danger); }
+
+        /* TABLE DE MISE */
+        .betting-table-wrap {
+            width: 100%;
+            max-width: 750px;
+            margin: 15px auto 0;
+            padding: 15px;
+            background: linear-gradient(135deg, #5C3A1E 0%, #3A2412 100%);
+            border-radius: 16px;
+            box-shadow: 
+                0 12px 40px rgba(0,0,0,0.7),
+                inset 0 2px 6px rgba(255, 215, 130, 0.2),
+                inset 0 -4px 12px rgba(0,0,0,0.6);
+            position: relative;
+        }
+
+        .betting-table-wrap::before {
+            content: '';
+            position: absolute;
+            inset: 4px;
+            border-radius: 12px;
+            border: 1px solid rgba(212, 175, 55, 0.4);
+            pointer-events: none;
+        }
+
+        .betting-table {
+            background: radial-gradient(ellipse at center, #106B40 0%, #0A4A2A 70%, #063218 100%);
+            border-radius: 10px;
+            padding: 12px;
+            box-shadow: 
+                inset 0 0 40px rgba(0,0,0,0.6),
+                inset 0 0 8px rgba(212, 175, 55, 0.15);
+            position: relative;
+        }
+
+        .bet-row { display: flex; gap: 3px; margin-bottom: 3px; }
+        .bet-cell {
+            background: rgba(0,0,0,0.25);
+            border: 1.5px solid rgba(212, 175, 55, 0.4);
+            color: white;
+            padding: 6px 3px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.15s;
+            position: relative;
+            min-height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+        }
+        .bet-cell:hover { 
+            background: rgba(212, 175, 55, 0.2); 
+            border-color: var(--gold);
+            transform: scale(1.02);
+            box-shadow: 0 0 12px rgba(212, 175, 55, 0.4);
+        }
+        .bet-cell.red-bet { background: linear-gradient(135deg, #C62828 0%, #8B0000 100%); border-color: #FF5252; }
+        .bet-cell.red-bet:hover { background: linear-gradient(135deg, #E53935 0%, #B71C1C 100%); }
+        .bet-cell.black-bet { background: linear-gradient(135deg, #1A1A1A 0%, #000 100%); border-color: #555; }
+        .bet-cell.black-bet:hover { background: linear-gradient(135deg, #333 0%, #111 100%); }
+        .bet-cell.number-cell { flex: 1; min-width: 0; padding: 5px 2px; font-size: 12px; }
+        .bet-cell.zero-cell { 
+            background: linear-gradient(135deg, #0D8043 0%, #065C2C 100%); 
+            border-color: #00C853; 
+            min-width: 46px;
+            font-size: 14px;
+        }
+        .bet-cell.zero-cell:hover { background: linear-gradient(135deg, #10A055 0%, #0D8043 100%); }
+        .bet-cell.outside-bet { flex: 1; font-size: 10px; padding: 8px 4px; }
+
+        .numbers-grid { flex: 1; display: grid; grid-template-columns: repeat(12, 1fr); gap: 3px; }
+        .numbers-grid .col { display: flex; flex-direction: column; gap: 3px; }
+
+        .bet-chip {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 24px; height: 24px; border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, var(--zino-orange) 0%, var(--zino-orange-dark) 100%);
+            color: #000;
+            font-size: 9px; font-weight: 900;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.7), inset 0 -2px 4px rgba(0,0,0,0.2);
+            border: 2px solid white;
+            z-index: 5;
+            pointer-events: none;
+            animation: chipDrop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        @keyframes chipDrop {
+            0% { transform: translate(-50%, -50%) scale(0) rotate(-30deg); }
+            100% { transform: translate(-50%, -50%) scale(1) rotate(0deg); }
+        }
+
+        .game-footer { background: var(--bg-panel); border-top: 1px solid var(--border-color); padding: 8px 20px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--text-muted); }
+
+        .confetti-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 999; overflow: hidden; display: none; }
+        .confetti-container.active { display: block; }
+        .confetti { position: absolute; width: 10px; height: 10px; animation: confettiFall 3s linear forwards; }
+        @keyframes confettiFall { 0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
+
+        @media (max-width: 768px) {
+            .game-layout { flex-direction: column; }
+            .side-panel { width: 100%; max-height: 42vh; border-right: none; border-top: 1px solid var(--border-color); order: 2; padding: 10px; }
+            .game-area { order: 1; min-height: 58vh; padding: 10px; }
+            .wheel-wrapper { width: 280px; height: 280px; }
+            .wheel-scene { transform: rotateX(15deg); }
+            .wheel-hub { width: 80px; height: 80px; margin: -40px 0 0 -40px; }
+            .wheel-hub::before { width: 55px; height: 55px; }
+            .wheel-hub::after { font-size: 26px; }
+            .wheel-number { font-size: 8px; }
+            .ball { width: 12px; height: 12px; margin: -6px 0 0 -6px; }
+            .result-num { font-size: 36px; padding: 8px 18px; min-width: 90px; }
+            .bet-cell.number-cell { font-size: 9px; padding: 3px 1px; min-height: 28px; }
+            .bet-cell.zero-cell { min-width: 34px; font-size: 11px; }
+            .bet-cell.outside-bet { font-size: 8px; padding: 5px 2px; }
+            .chip { width: 42px; height: 42px; font-size: 11px; }
+            .user-name { display: none; }
+        }
+            /* ============================================================
+           OPTIMISATION MOBILE
+           ============================================================ */
+        @media (max-width: 768px) {
+            header { padding: 8px 10px !important; height: 50px !important; }
+            .logo { font-size: 18px !important; }
+            .back-btn { padding: 5px 8px !important; font-size: 11px !important; }
+            .balance-display { font-size: 11px !important; }
+            .user-avatar { width: 24px !important; height: 24px !important; }
+            .user-name { display: none !important; }
+
+            .game-layout { flex-direction: column !important; }
+            .game-area { order: 1 !important; min-height: 60vh !important; padding: 8px !important; }
+            .side-panel {
+                order: 2 !important;
+                width: 100% !important;
+                max-height: 50vh !important;
+                border-right: none !important;
+                border-top: 1px solid var(--border-color) !important;
+                padding: 10px !important;
+            }
+
+            /* ROUE adaptative */
+            .wheel-wrapper {
+                width: 260px !important;
+                height: 260px !important;
+                margin-bottom: 8px !important;
+            }
+            .wheel-rim::before { inset: 8px !important; }
+            .wheel-inner { inset: 30px !important; }
+            .wheel-hub {
+                width: 65px !important;
+                height: 65px !important;
+                margin: -32.5px 0 0 -32.5px !important;
+            }
+            .wheel-hub::before { width: 45px !important; height: 45px !important; }
+            .wheel-hub::after { font-size: 22px !important; }
+            .wheel-number {
+                width: 14px !important;
+                height: 14px !important;
+                margin: -7px 0 0 -7px !important;
+                font-size: 7px !important;
+            }
+            .ball-3d {
+                width: 12px !important;
+                height: 12px !important;
+                margin: -6px 0 0 -6px !important;
+            }
+
+            /* Résultat */
+            .result-num {
+                font-size: 38px !important;
+                padding: 8px 20px !important;
+                min-width: 90px !important;
+                border-radius: 10px !important;
+            }
+            .result-label { font-size: 10px !important; }
+            .result-message { font-size: 16px !important; }
+
+            /* Table de mise COMPACTE */
+            .betting-table-wrap {
+                padding: 8px !important;
+                margin-top: 10px !important;
+                border-radius: 12px !important;
+            }
+            .betting-table {
+                padding: 6px !important;
+                border-radius: 8px !important;
+            }
+            .bet-row { gap: 2px !important; margin-bottom: 2px !important; }
+            .bet-cell {
+                padding: 4px 2px !important;
+                font-size: 9px !important;
+                min-height: 32px !important;
+                border-radius: 3px !important;
+                border-width: 1px !important;
+            }
+            .bet-cell.number-cell {
+                padding: 4px 1px !important;
+                font-size: 11px !important;
+                font-weight: 800 !important;
+            }
+            .bet-cell.zero-cell {
+                min-width: 34px !important;
+                font-size: 13px !important;
+            }
+            .bet-cell.outside-bet {
+                font-size: 8px !important;
+                padding: 6px 2px !important;
+                line-height: 1.1 !important;
+            }
+            .numbers-grid { gap: 2px !important; }
+
+            .bet-chip {
+                width: 20px !important;
+                height: 20px !important;
+                font-size: 8px !important;
+            }
+
+            /* Panneau gauche compact */
+            .bet-info { padding: 8px 10px !important; }
+            .bet-info-value { font-size: 16px !important; }
+            .bet-info-label { font-size: 10px !important; }
+
+            .chips-container { gap: 5px !important; padding: 4px 0 !important; }
+            .chip {
+                width: 42px !important;
+                height: 42px !important;
+                font-size: 11px !important;
+                border-width: 2px !important;
+            }
+
+            .main-btn { padding: 14px !important; font-size: 14px !important; }
+            .undo-btn { padding: 12px !important; font-size: 12px !important; }
+
+            .stats-box, .history-box { padding: 10px !important; }
+            .stat-row { font-size: 11px !important; }
+            .history-num { width: 22px !important; height: 22px !important; font-size: 10px !important; }
+        }
+
+        @media (max-width: 400px) {
+            .wheel-wrapper {
+                width: 220px !important;
+                height: 220px !important;
+            }
+            .wheel-inner { inset: 26px !important; }
+            .wheel-hub { width: 55px !important; height: 55px !important; margin: -27.5px 0 0 -27.5px !important; }
+            .wheel-hub::before { width: 38px !important; height: 38px !important; }
+            .wheel-number {
+                width: 12px !important;
+                height: 12px !important;
+                margin: -6px 0 0 -6px !important;
+                font-size: 6px !important;
+            }
+            .result-num { font-size: 32px !important; padding: 6px 16px !important; }
+            .bet-cell.number-cell { font-size: 10px !important; min-height: 28px !important; }
+            .bet-cell.outside-bet { font-size: 7px !important; padding: 5px 1px !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div style="display:flex; align-items:center; gap:15px;">
+            <a href="index.html" class="back-btn">← Accueil</a>
+            <a href="index.html" class="logo">Zino<span>.bet</span></a>
+        </div>
+        <div class="header-right">
+            <div class="balance-display">Solde : <span id="balanceDisplay">--</span> €</div>
+            <a href="account.html" class="user-badge" id="userBadge" style="display:none;">
+                <div class="user-avatar" id="userAvatar">?</div>
+                <span class="user-name" id="userName">--</span>
+            </a>
+            <button class="sound-btn" id="soundBtn" onclick="toggleSound()">🔊</button>
+        </div>
+    </header>
+
+    <div class="game-layout">
+
+        <aside class="side-panel">
+            <div class="bet-info">
+                <span class="bet-info-label">Mise totale</span>
+                <span class="bet-info-value" id="totalBetDisplay">0 €</span>
+            </div>
+
+            <div>
+                <div class="panel-title">Jeton sélectionné</div>
+                <div class="chips-container">
+                    <div class="chip chip-1" onclick="selectChip(1, this)">1</div>
+                    <div class="chip chip-5 selected" onclick="selectChip(5, this)">5</div>
+                    <div class="chip chip-25" onclick="selectChip(25, this)">25</div>
+                    <div class="chip chip-100" onclick="selectChip(100, this)">100</div>
+                    <div class="chip chip-500" onclick="selectChip(500, this)">500</div>
+                </div>
+            </div>
+
+            <button class="main-btn" id="btnSpin" onclick="spin()" disabled>Lancer la roulette 🎡</button>
+            <button class="undo-btn" id="btnClear" onclick="clearBets()" disabled>✕ Annuler les mises</button>
+
+            <div class="stats-box">
+                <div class="panel-title">Vos statistiques</div>
+                <div class="stat-row"><span class="stat-label">Profit</span><span class="stat-value green" id="statProfit">0.00</span></div>
+                <div class="stat-row"><span class="stat-label">Misé</span><span class="stat-value" id="statWagered">0.00</span></div>
+                <div class="stat-row"><span class="stat-label">Victoires</span><span class="stat-value" id="statWins">0</span></div>
+                <div class="stat-row"><span class="stat-label">Défaites</span><span class="stat-value" id="statLosses">0</span></div>
+            </div>
+
+            <div style="background:var(--bg-main);border:1px solid var(--border-color);border-radius:6px;padding:10px;">
+                <div class="panel-title">Derniers numéros</div>
+                <div class="history-numbers" id="historyNumbers"><span style="color:#556987; font-size:11px;">Aucun lancer</span></div>
+            </div>
+        </aside>
+
+        <main class="game-area">
+            <div class="roulette-container">
+                <div class="wheel-wrapper">
+                    <div class="wheel-scene">
+                        <div class="wheel-rim">
+                            <div class="wheel-ball-track"></div>
+                            <div class="wheel" id="wheel">
+                                <svg class="wheel-svg" id="wheelSvg" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet"></svg>
+                                <div class="wheel-numbers" id="wheelNumbers"></div>
+                            </div>
+                            <div class="wheel-hub"></div>
+                        </div>
+                    </div>
+                    <div class="ball" id="ball"></div>
+                </div>
+
+                <div class="result-display">
+                    <div class="result-label">Dernier numéro</div>
+                    <div class="result-num idle" id="resultNum">--</div>
+                </div>
+                <div class="result-message" id="resultMessage"></div>
+            </div>
+
+            <div class="betting-table-wrap">
+                <div class="betting-table">
+                    <div class="bet-row">
+                        <div class="bet-cell zero-cell" onclick="placeBet('straight', 0, 36)">
+                            0
+                            <div class="bet-chip" id="chip-straight-0" style="display:none;"></div>
+                        </div>
+                        <div class="bet-cell outside-bet" onclick="placeBet('dozen', 1, 2)">
+                            1ère douzaine<br>(1-12)
+                            <div class="bet-chip" id="chip-dozen-1" style="display:none;"></div>
+                        </div>
+                        <div class="bet-cell outside-bet" onclick="placeBet('dozen', 2, 2)">
+                            2ème douzaine<br>(13-24)
+                            <div class="bet-chip" id="chip-dozen-2" style="display:none;"></div>
+                        </div>
+                        <div class="bet-cell outside-bet" onclick="placeBet('dozen', 3, 2)">
+                            3ème douzaine<br>(25-36)
+                            <div class="bet-chip" id="chip-dozen-3" style="display:none;"></div>
+                        </div>
+                    </div>
+
+                    <div class="bet-row">
+                        <div class="numbers-grid" id="numbersGrid"></div>
+                    </div>
+
+                    <div class="bet-row">
+                        <div class="bet-cell outside-bet" style="flex:2;" onclick="placeBet('low', null, 1)">
+                            1-18 (Manque)
+                            <div class="bet-chip" id="chip-low" style="display:none;"></div>
+                        </div>
+                        <div class="bet-cell outside-bet" onclick="placeBet('even', null, 1)">
+                            PAIR
+                            <div class="bet-chip" id="chip-even" style="display:none;"></div>
+                        </div>
+                        <div class="bet-cell red-bet" onclick="placeBet('red', null, 1)">
+                            ROUGE
+                            <div class="bet-chip" id="chip-red" style="display:none;"></div>
+                        </div>
+                        <div class="bet-cell black-bet" onclick="placeBet('black', null, 1)">
+                            NOIR
+                            <div class="bet-chip" id="chip-black" style="display:none;"></div>
+                        </div>
+                        <div class="bet-cell outside-bet" onclick="placeBet('odd', null, 1)">
+                            IMPAIR
+                            <div class="bet-chip" id="chip-odd" style="display:none;"></div>
+                        </div>
+                        <div class="bet-cell outside-bet" style="flex:2;" onclick="placeBet('high', null, 1)">
+                            19-36 (Passe)
+                            <div class="bet-chip" id="chip-high" style="display:none;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="game-footer">
+        <span>Zino Originals</span>
+        <span>Roulette Premium v4.0</span>
+    </div>
+
+    <div class="confetti-container" id="confettiContainer"></div>
+
+    <script>
+        // ZINO AUTH
+        const ZinoAuth = (() => {
+            const USERS_KEY = 'zino_users_v1';
+            const SESSION_KEY = 'zino_session_v1';
+            function init() { if (!localStorage.getItem(USERS_KEY)) localStorage.setItem(USERS_KEY, JSON.stringify({})); }
+            function hashPassword(password) {
+                const salt = 'zino_salt_2026_xoxo';
+                const combined = salt + password + salt;
+                let hash = 0;
+                for (let i = 0; i < combined.length; i++) {
+                    const char = combined.charCodeAt(i);
+                    hash = ((hash << 5) - hash) + char;
+                    hash = hash & hash;
+                }
+                return 'h_' + Math.abs(hash).toString(36);
+            }
+            function register(email, password, username) {
+                init();
+                email = email.toLowerCase().trim();
+                if (!email || !email.includes('@')) return { success: false, error: 'Email invalide' };
+                if (!password || password.length < 4) return { success: false, error: 'Mot de passe trop court' };
+                if (!username || username.trim().length < 2) return { success: false, error: 'Pseudo trop court' };
+                const users = JSON.parse(localStorage.getItem(USERS_KEY));
+                if (users[email]) return { success: false, error: 'Cet email est déjà utilisé' };
+                const newUser = {
+                    email, username: username.trim(), passwordHash: hashPassword(password),
+                    balance: 1000, createdAt: Date.now(),
+                    stats: { totalWagered: 0, totalProfit: 0, gamesPlayed: 0, wins: 0, losses: 0 },
+                    transactions: [{ type: 'welcome', amount: 1000, date: Date.now(), description: 'Bonus de bienvenue 🎁' }]
+                };
+                users[email] = newUser;
+                localStorage.setItem(USERS_KEY, JSON.stringify(users));
+                localStorage.setItem(SESSION_KEY, email);
+                return { success: true, user: newUser };
+            }
+            function login(email, password) {
+                init();
+                email = email.toLowerCase().trim();
+                const users = JSON.parse(localStorage.getItem(USERS_KEY));
+                const user = users[email];
+                if (!user) return { success: false, error: 'Aucun compte' };
+                if (user.passwordHash !== hashPassword(password)) return { success: false, error: 'Mot de passe incorrect' };
+                localStorage.setItem(SESSION_KEY, email);
+                return { success: true, user };
+            }
+            function logout() { localStorage.removeItem(SESSION_KEY); }
+            function getCurrentUser() {
+                init();
+                const email = localStorage.getItem(SESSION_KEY);
+                if (!email) return null;
+                const users = JSON.parse(localStorage.getItem(USERS_KEY));
+                return users[email] || null;
+            }
+            function isLoggedIn() { return getCurrentUser() !== null; }
+            function updateUser(updates) {
+                const email = localStorage.getItem(SESSION_KEY);
+                if (!email) return false;
+                const users = JSON.parse(localStorage.getItem(USERS_KEY));
+                if (!users[email]) return false;
+                users[email] = { ...users[email], ...updates };
+                localStorage.setItem(USERS_KEY, JSON.stringify(users));
+                return true;
+            }
+            function getBalance() { const u = getCurrentUser(); return u ? u.balance : 0; }
+            function addToBalance(amount, description = '') {
+                const user = getCurrentUser();
+                if (!user) return false;
+                const newBalance = Math.max(0, user.balance + amount);
+                const transactions = [...user.transactions];
+                transactions.unshift({ type: amount >= 0 ? 'win' : 'bet', amount, date: Date.now(), description: description || (amount >= 0 ? 'Gain' : 'Mise') });
+                if (transactions.length > 100) transactions.length = 100;
+                return updateUser({ balance: newBalance, transactions });
+            }
+            function updateStats({ wagered = 0, profit = 0, won = false }) {
+                const user = getCurrentUser();
+                if (!user) return false;
+                const stats = {
+                    totalWagered: user.stats.totalWagered + wagered,
+                    totalProfit: user.stats.totalProfit + profit,
+                    gamesPlayed: user.stats.gamesPlayed + 1,
+                    wins: user.stats.wins + (won ? 1 : 0),
+                    losses: user.stats.losses + (won ? 0 : 1)
+                };
+                return updateUser({ stats });
+            }
+            return { register, login, logout, getCurrentUser, isLoggedIn, updateUser, getBalance, addToBalance, updateStats };
+        })();
+
+        if (!ZinoAuth.isLoggedIn()) {
+            window.location.href = 'index.html?require=login';
+        }
+        const currentUser = ZinoAuth.getCurrentUser();
+        let balance = currentUser.balance;
+
+        document.getElementById('userBadge').style.display = 'flex';
+        document.getElementById('userAvatar').textContent = currentUser.username[0].toUpperCase();
+        document.getElementById('userName').textContent = currentUser.username;
+
+        // CONSTANTES
+        const WHEEL_ORDER = [0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26];
+        const RED_NUMBERS = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36];
+
+        function getColor(num) {
+            if (num === 0) return 'green';
+            return RED_NUMBERS.includes(num) ? 'red' : 'black';
+        }
+        const N = WHEEL_ORDER.length;
+        const SLICE_ANGLE = 360 / N;
+
+        let selectedChip = 5;
+        let bets = {};
+        let gameState = 'idle';
+        let historyNumbers = [];
+        let soundEnabled = true;
+        let currentWheelRotation = 0;
+
+        // AUDIO
+        let audioCtx = null;
+        function initAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+        function playSound(type) {
+            if (!soundEnabled) return;
+            try {
+                initAudio();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const now = audioCtx.currentTime;
+                if (type === 'chip') {
+                    const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+                    osc.connect(gain); gain.connect(audioCtx.destination);
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(1800, now);
+                    osc.frequency.exponentialRampToValueAtTime(1200, now + 0.06);
+                    gain.gain.setValueAtTime(0.04, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+                    osc.start(now); osc.stop(now + 0.08);
+                } else if (type === 'spin') {
+                    const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+                    osc.connect(gain); gain.connect(audioCtx.destination);
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(200, now);
+                    osc.frequency.exponentialRampToValueAtTime(80, now + 0.5);
+                    gain.gain.setValueAtTime(0.05, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
+                    osc.start(now); osc.stop(now + 0.6);
+                } else if (type === 'tick') {
+                    const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+                    osc.connect(gain); gain.connect(audioCtx.destination);
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(2500, now);
+                    gain.gain.setValueAtTime(0.02, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
+                    osc.start(now); osc.stop(now + 0.03);
+                } else if (type === 'win') {
+                    [523, 659, 784, 1047].forEach((f, i) => {
+                        const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+                        osc.connect(gain); gain.connect(audioCtx.destination);
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(f, now + i * 0.1);
+                        gain.gain.setValueAtTime(0.12, now + i * 0.1);
+                        gain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.1 + 0.3);
+                        osc.start(now + i * 0.1); osc.stop(now + i * 0.1 + 0.3);
+                    });
+                } else if (type === 'lose') {
+                    const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+                    osc.connect(gain); gain.connect(audioCtx.destination);
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(300, now);
+                    osc.frequency.exponentialRampToValueAtTime(120, now + 0.3);
+                    gain.gain.setValueAtTime(0.08, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+                    osc.start(now); osc.stop(now + 0.4);
+                } else if (type === 'click') {
+                    const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+                    osc.connect(gain); gain.connect(audioCtx.destination);
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(1000, now);
+                    gain.gain.setValueAtTime(0.03, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.03);
+                    osc.start(now); osc.stop(now + 0.03);
+                }
+            } catch (e) {}
+        }
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const btn = document.getElementById('soundBtn');
+            btn.textContent = soundEnabled ? '🔊' : '🔇';
+            btn.classList.toggle('muted', !soundEnabled);
+            if (soundEnabled) playSound('click');
+        }
+
+        // CONSTRUCTION DE LA ROUE
+        const SVG_NS = 'http://www.w3.org/2000/svg';
+        const SVG_CENTER = 200;
+        const SVG_RADIUS = 200;
+        // Pour un vrai rendu réaliste :
+        // - Les secteurs doivent avoir la MÊME largeur (9.73°)
+        // - Les numéros doivent être ORIENTÉS radialement (lisibles depuis l'extérieur)
+        // - Un anneau intérieur doré sépare les secteurs du moyeu
+
+        function polarToCartesian(cx, cy, r, angleDeg) {
+            const rad = (angleDeg - 90) * Math.PI / 180;
+            return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
+        }
+        function describeArc(cx, cy, innerR, outerR, startAngle, endAngle) {
+            const start = polarToCartesian(cx, cy, outerR, startAngle);
+            const end = polarToCartesian(cx, cy, outerR, endAngle);
+            const startInner = polarToCartesian(cx, cy, innerR, startAngle);
+            const endInner = polarToCartesian(cx, cy, innerR, endAngle);
+            const largeArc = (endAngle - startAngle) <= 180 ? 0 : 1;
+            return [
+                `M ${start.x} ${start.y}`,
+                `A ${outerR} ${outerR} 0 ${largeArc} 1 ${end.x} ${end.y}`,
+                `L ${endInner.x} ${endInner.y}`,
+                `A ${innerR} ${innerR} 0 ${largeArc} 0 ${startInner.x} ${startInner.y}`,
+                'Z'
+            ].join(' ');
+        }
+
+        function buildWheel() {
+            const svg = document.getElementById('wheelSvg');
+            const numbersContainer = document.getElementById('wheelNumbers');
+            svg.innerHTML = '';
+            numbersContainer.innerHTML = '';
+
+            // Rayon intérieur du moyeu (là où les secteurs s'arrêtent)
+            const innerRadius = 80;
+            // Rayon extérieur (là où les secteurs s'arrêtent, avant la piste de la bille)
+            const outerRadius = 200;
+
+            WHEEL_ORDER.forEach((num, i) => {
+                const color = getColor(num);
+                const fillColor = color === 'red' ? '#B71C1C' : color === 'black' ? '#0D0D0D' : '#0B6B3A';
+                // Le secteur i est centré sur i * SLICE_ANGLE
+                const startAngle = (i * SLICE_ANGLE) - (SLICE_ANGLE / 2) + 0.3;
+                const endAngle = (i * SLICE_ANGLE) + (SLICE_ANGLE / 2) - 0.3;
+
+                const path = document.createElementNS(SVG_NS, 'path');
+                path.setAttribute('d', describeArc(SVG_CENTER, SVG_CENTER, innerRadius, outerRadius, startAngle, endAngle));
+                path.setAttribute('fill', fillColor);
+                path.setAttribute('stroke', '#D4AF37');
+                path.setAttribute('stroke-width', '1');
+                svg.appendChild(path);
+
+                // Numéro : orienté radialement, à mi-chemin entre inner et outer
+                const numAngle = i * SLICE_ANGLE;
+                const numRadius = 145;
+                const numPos = polarToCartesian(SVG_CENTER, SVG_CENTER, numRadius, numAngle);
+
+                // Calcul de l'orientation : le texte doit être perpendiculaire au rayon
+                // On oriente le texte pour qu'il soit lisible depuis l'extérieur
+                // L'angle du texte = numAngle (pour qu'il soit aligné avec le rayon)
+                // On veut que le haut du texte pointe vers l'extérieur
+                const textRotation = numAngle - 90;
+
+                const numEl = document.createElement('div');
+                numEl.className = 'wheel-number';
+                numEl.textContent = num;
+                numEl.style.left = `${(numPos.x / 400) * 100}%`;
+                numEl.style.top = `${(numPos.y / 400) * 100}%`;
+                // Positionner avec rotation pour orienter le texte radialement
+                numEl.style.transform = `translate(-50%, -50%) rotate(${textRotation}deg)`;
+                numEl.style.transformOrigin = 'center center';
+                numbersContainer.appendChild(numEl);
+            });
+
+            // Cercle intérieur du moyeu (fond vert foncé)
+            const innerCircle = document.createElementNS(SVG_NS, 'circle');
+            innerCircle.setAttribute('cx', SVG_CENTER);
+            innerCircle.setAttribute('cy', SVG_CENTER);
+            innerCircle.setAttribute('r', innerRadius);
+            innerCircle.setAttribute('fill', '#0A3520');
+            innerCircle.setAttribute('stroke', '#D4AF37');
+            innerCircle.setAttribute('stroke-width', '2');
+            svg.appendChild(innerCircle);
+
+            // Cercle extérieur (bordure)
+            const outerCircle = document.createElementNS(SVG_NS, 'circle');
+            outerCircle.setAttribute('cx', SVG_CENTER);
+            outerCircle.setAttribute('cy', SVG_CENTER);
+            outerCircle.setAttribute('r', outerRadius - 1);
+            outerCircle.setAttribute('fill', 'none');
+            outerCircle.setAttribute('stroke', '#D4AF37');
+            outerCircle.setAttribute('stroke-width', '2');
+            svg.appendChild(outerCircle);
+
+            // Lignes de séparation dorées entre les secteurs
+            for (let i = 0; i < N; i++) {
+                const angle = i * SLICE_ANGLE;
+                const p1 = polarToCartesian(SVG_CENTER, SVG_CENTER, innerRadius, angle);
+                const p2 = polarToCartesian(SVG_CENTER, SVG_CENTER, outerRadius, angle);
+                const line = document.createElementNS(SVG_NS, 'line');
+                line.setAttribute('x1', p1.x);
+                line.setAttribute('y1', p1.y);
+                line.setAttribute('x2', p2.x);
+                line.setAttribute('y2', p2.y);
+                line.setAttribute('stroke', '#D4AF37');
+                line.setAttribute('stroke-width', '0.8');
+                line.setAttribute('opacity', '0.8');
+                svg.appendChild(line);
+            }
+        }
+
+        function buildBettingGrid() {
+            const grid = document.getElementById('numbersGrid');
+            let html = '';
+            for (let col = 1; col <= 12; col++) {
+                const topNum = col * 3;
+                const midNum = col * 3 - 1;
+                const botNum = col * 3 - 2;
+                html += `<div class="col">`;
+                [topNum, midNum, botNum].forEach(num => {
+                    const color = getColor(num);
+                    const cls = color === 'red' ? 'red-bet' : 'black-bet';
+                    html += `<div class="bet-cell number-cell ${cls}" onclick="placeBet('straight', ${num}, 36)">
+                        ${num}
+                        <div class="bet-chip" id="chip-straight-${num}" style="display:none;"></div>
+                    </div>`;
+                });
+                html += `</div>`;
+            }
+            grid.innerHTML = html;
+        }
+
+        function selectChip(amount, el) {
+            if (gameState === 'spinning') return;
+            selectedChip = amount;
+            document.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected');
+            playSound('click');
+        }
+
+        function placeBet(type, value, payout) {
+            if (gameState === 'spinning') return;
+            if (ZinoAuth.getBalance() < selectedChip) {
+                alert('Solde insuffisant');
+                return;
+            }
+            const key = value !== null && value !== undefined ? `${type}-${value}` : type;
+            ZinoAuth.addToBalance(-selectedChip, `Mise Roulette - ${selectedChip} €`);
+            bets[key] = (bets[key] || 0) + selectedChip;
+            playSound('chip');
+            updateUI();
+            updateBetChips();
+        }
+
+        function updateBetChips() {
+            document.querySelectorAll('.bet-chip').forEach(c => c.style.display = 'none');
+            Object.entries(bets).forEach(([key, amount]) => {
+                const chipEl = document.getElementById(`chip-${key}`);
+                if (chipEl) {
+                    chipEl.style.display = 'flex';
+                    chipEl.textContent = amount;
+                }
+            });
+        }
+
+        function clearBets() {
+            if (gameState === 'spinning') return;
+            let total = 0;
+            Object.values(bets).forEach(v => total += v);
+            if (total > 0) {
+                ZinoAuth.addToBalance(total, `Annulation des mises Roulette +${total} €`);
+            }
+            bets = {};
+            playSound('click');
+            updateUI();
+            updateBetChips();
+        }
+
+        function updateUI() {
+            balance = ZinoAuth.getBalance();
+            document.getElementById('balanceDisplay').textContent = balance.toFixed(2);
+            const u = ZinoAuth.getCurrentUser();
+            document.getElementById('statProfit').textContent = u.stats.totalProfit.toFixed(2);
+            document.getElementById('statWagered').textContent = u.stats.totalWagered.toFixed(2);
+            document.getElementById('statWins').textContent = u.stats.wins;
+            document.getElementById('statLosses').textContent = u.stats.losses;
+            const profitEl = document.getElementById('statProfit');
+            profitEl.className = 'stat-value ' + (u.stats.totalProfit >= 0 ? 'green' : 'red');
+            const totalBet = Object.values(bets).reduce((a, b) => a + b, 0);
+            document.getElementById('totalBetDisplay').textContent = totalBet.toFixed(0) + ' €';
+            document.getElementById('btnSpin').disabled = gameState === 'spinning' || totalBet === 0;
+            document.getElementById('btnClear').disabled = gameState === 'spinning' || totalBet === 0;
+        }
+
+        function renderHistory() {
+            const container = document.getElementById('historyNumbers');
+            if (historyNumbers.length === 0) {
+                container.innerHTML = '<span style="color:#556987; font-size:11px;">Aucun lancer</span>';
+                return;
+            }
+            container.innerHTML = historyNumbers.slice(0, 12).map(num => {
+                const color = getColor(num);
+                return `<div class="history-num ${color}" title="${num}">${num}</div>`;
+            }).join('');
+        }
+
+        // SPIN
+        async function spin() {
+            if (gameState === 'spinning') return;
+            const totalBetAmount = Object.values(bets).reduce((a, b) => a + b, 0);
+            if (totalBetAmount === 0) return;
+
+            gameState = 'spinning';
+            updateUI();
+            playSound('spin');
+
+            const resultNum = document.getElementById('resultNum');
+            const resultMessage = document.getElementById('resultMessage');
+            resultNum.className = 'result-num idle';
+            resultNum.textContent = '--';
+            resultMessage.classList.remove('active', 'win', 'lose');
+
+            const winningNumber = Math.floor(Math.random() * 37);
+            const color = getColor(winningNumber);
+            const wheelIndex = WHEEL_ORDER.indexOf(winningNumber);
+            const targetAngle = wheelIndex * SLICE_ANGLE;
+
+            const extraTurns = 5 + Math.floor(Math.random() * 3);
+            const baseRotation = currentWheelRotation;
+            const targetMod = ((-targetAngle) % 360 + 360) % 360;
+            const currentMod = ((baseRotation) % 360 + 360) % 360;
+            let diff = targetMod - currentMod;
+            if (diff < 0) diff += 360;
+            const newRotation = baseRotation + (extraTurns * 360) + diff;
+            currentWheelRotation = newRotation;
+
+            const wheel = document.getElementById('wheel');
+            const ball = document.getElementById('ball');
+
+            wheel.style.transform = `rotate(${newRotation}deg)`;
+
+            const tickInterval = setInterval(() => playSound('tick'), 120);
+            setTimeout(() => clearInterval(tickInterval), 4500);
+
+            const DURATION = 5000;
+            const startTime = Date.now();
+            const ballTurns = 12 + Math.floor(Math.random() * 4);
+            const startRadius = 130;
+            const endRadius = 100;
+
+            await new Promise(resolve => {
+                const animateBall = () => {
+                    const elapsed = Date.now() - startTime;
+                    const progress = Math.min(1, elapsed / DURATION);
+                    const eased = 1 - Math.pow(1 - progress, 3);
+                    const ballAngle = (1 - eased) * ballTurns * 360;
+                    const currentRadius = startRadius + (endRadius - startRadius) * eased;
+                    const rad = (ballAngle * Math.PI) / 180;
+                    const x = Math.sin(rad) * currentRadius;
+                    const y = -Math.cos(rad) * currentRadius;
+                    ball.style.transform = `translate(${x}px, ${y}px)`;
+                    if (progress < 1) requestAnimationFrame(animateBall);
+                    else resolve();
+                };
+                requestAnimationFrame(animateBall);
+            });
+
+            ball.style.transform = `translate(0px, -${endRadius}px)`;
+
+            await new Promise(r => setTimeout(r, 400));
+
+            resultNum.className = `result-num ${color}`;
+            resultNum.textContent = winningNumber;
+
+            historyNumbers.unshift(winningNumber);
+            if (historyNumbers.length > 15) historyNumbers.pop();
+            renderHistory();
+
+            let totalWin = 0;
+            function checkStraight(num) { return num === winningNumber; }
+            function checkRed() { return getColor(winningNumber) === 'red'; }
+            function checkBlack() { return getColor(winningNumber) === 'black'; }
+            function checkEven() { return winningNumber !== 0 && winningNumber % 2 === 0; }
+            function checkOdd() { return winningNumber !== 0 && winningNumber % 2 === 1; }
+            function checkLow() { return winningNumber >= 1 && winningNumber <= 18; }
+            function checkHigh() { return winningNumber >= 19 && winningNumber <= 36; }
+            function checkDozen(d) {
+                if (winningNumber === 0) return false;
+                if (d === 1) return winningNumber >= 1 && winningNumber <= 12;
+                if (d === 2) return winningNumber >= 13 && winningNumber <= 24;
+                if (d === 3) return winningNumber >= 25 && winningNumber <= 36;
+                return false;
+            }
+
+            Object.entries(bets).forEach(([key, amount]) => {
+                let won = false, payout = 0;
+                if (key.startsWith('straight-')) {
+                    const num = parseInt(key.split('-')[1]);
+                    if (checkStraight(num)) { won = true; payout = amount * 36; }
+                } else if (key === 'red') { if (checkRed()) { won = true; payout = amount * 2; } }
+                else if (key === 'black') { if (checkBlack()) { won = true; payout = amount * 2; } }
+                else if (key === 'even') { if (checkEven()) { won = true; payout = amount * 2; } }
+                else if (key === 'odd') { if (checkOdd()) { won = true; payout = amount * 2; } }
+                else if (key === 'low') { if (checkLow()) { won = true; payout = amount * 2; } }
+                else if (key === 'high') { if (checkHigh()) { won = true; payout = amount * 2; } }
+                else if (key.startsWith('dozen-')) {
+                    const d = parseInt(key.split('-')[1]);
+                    if (checkDozen(d)) { won = true; payout = amount * 3; }
+                }
+                if (won) totalWin += payout;
+            });
+
+            const net = totalWin - totalBetAmount;
+
+            if (totalWin > 0) {
+                ZinoAuth.addToBalance(totalWin, `Gain Roulette (n°${winningNumber}) +${totalWin.toFixed(2)} €`);
+            }
+
+            ZinoAuth.updateStats({ wagered: totalBetAmount, profit: net, won: net > 0 });
+
+            if (net > 0) {
+                playSound('win');
+                resultNum.classList.add('win');
+                resultMessage.textContent = `+${net.toFixed(2)} €`;
+                resultMessage.classList.add('active', 'win');
+                launchConfetti();
+            } else if (net < 0) {
+                playSound('lose');
+                resultMessage.textContent = `${net.toFixed(2)} €`;
+                resultMessage.classList.add('active', 'lose');
+            } else {
+                resultMessage.textContent = 'Égalité';
+                resultMessage.classList.add('active');
+            }
+
+            updateUI();
+
+            setTimeout(() => {
+                bets = {};
+                updateBetChips();
+                gameState = 'idle';
+                updateUI();
+                setTimeout(() => {
+                    ball.style.transition = 'transform 0.5s ease-out';
+                    ball.style.transform = 'translate(0px, -130px)';
+                    setTimeout(() => { ball.style.transition = 'transform 5s cubic-bezier(0.15, 0.65, 0.1, 1)'; }, 500);
+                }, 200);
+            }, 3000);
+        }
+
+        function launchConfetti() {
+            const container = document.getElementById('confettiContainer');
+            container.classList.add('active');
+            container.innerHTML = '';
+            const colors = ['#FFA94D', '#FF922B', '#00E701', '#1475E1', '#FFFFFF', '#FFD700'];
+            for (let i = 0; i < 80; i++) {
+                const conf = document.createElement('div');
+                conf.className = 'confetti';
+                conf.style.left = Math.random() * 100 + '%';
+                conf.style.background = colors[Math.floor(Math.random() * colors.length)];
+                conf.style.animationDelay = Math.random() * 0.5 + 's';
+                conf.style.animationDuration = (2 + Math.random() * 1.5) + 's';
+                conf.style.width = (5 + Math.random() * 8) + 'px';
+                conf.style.height = (5 + Math.random() * 8) + 'px';
+                container.appendChild(conf);
+            }
+            setTimeout(() => container.classList.remove('active'), 3500);
+        }
+
+        buildWheel();
+        buildBettingGrid();
+        updateUI();
+    </script>
+</body>
+</html>
